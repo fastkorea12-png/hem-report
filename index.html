@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>HEM 서면 보고</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow column, phone first. Header(날짜) → 작성/종합 탭 → 해당 화면 */
+:root {
+  --bg: #f3f5f2;
+  --surface: #ffffff;
+  --fg: #1c2421;
+  --muted: #5d6a64;
+  --line: #d5ddd8;
+  --accent: #1f5c4a;
+  --accent-soft: #e2eee8;
+  --amber: #8a5a00;
+  --amber-soft: #fbf0d9;
+  --ok: #2c7a4b;
+  --font-display: "Gowun Batang", "Nanum Myeongjo", serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131917; --surface: #1b2320; --fg: #e6ece9; --muted: #9aa8a1; --line: #2e3a35;
+    --accent: #7cc4a8; --accent-soft: #22352e; --amber: #f0c36a; --amber-soft: #3a2f17; --ok: #7fd3a0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131917; --surface: #1b2320; --fg: #e6ece9; --muted: #9aa8a1; --line: #2e3a35;
+  --accent: #7cc4a8; --accent-soft: #22352e; --amber: #f0c36a; --amber-soft: #3a2f17; --ok: #7fd3a0;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+.toast a { color: var(--accent); }
+.login { align-items: flex-start; gap: 14px; margin-top: 8vh; }
+.linkbtn { font: inherit; font-size: inherit; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.sweek { text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sitecard .note { min-height: 64px; }
+.card-actions { display: flex; gap: 6px; }
+.card-actions .ghost { padding: 5px 10px; font-size: 12.5px; min-width: 52px; }
+.ghost.danger, .ghost.armed { color: var(--amber); }
+.ghost.armed { border-color: var(--amber); background: var(--amber-soft); }
+.sitecard header { flex-wrap: wrap; }
+.sitecard .field .k { font-size: 12px; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 560px; margin: 0 auto; padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 18px; }
+.view { display: flex; flex-direction: column; gap: 18px; }
+.preview { font-size: 12.5px; color: var(--amber); background: var(--amber-soft); border-radius: 8px; padding: 8px 12px; }
+header { display: flex; flex-direction: column; gap: 4px; }
+.eyebrow { font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+h1 { font-family: var(--font-display); font-size: 26px; line-height: 1.25; margin: 0; text-wrap: balance; }
+.week { font-size: 14px; color: var(--muted); }
+h2 { font-size: 13px; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin: 0; }
+h3 { margin: 0; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
+.tab { font: inherit; font-weight: 600; font-size: 14.5px; padding: 9px; border: 0; border-radius: 9px; background: none; color: var(--muted); cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--surface); }
+.status { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.status { gap: 6px 16px; }
+.st { display: flex; align-items: baseline; gap: 8px; min-width: 0; font-size: 13.5px; color: var(--muted); cursor: default; }
+.st::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--line); transform: translateY(-1px); }
+.st b { font-weight: 500; }
+.st .who { font-size: 12px; margin-left: auto; white-space: nowrap; }
+.st.done { color: var(--fg); }
+.st.done::before { background: var(--ok); }
+.st.done .who { color: var(--ok); }
+.pill { font-size: 12px; padding: 1px 8px; border-radius: 99px; white-space: nowrap; color: var(--muted); background: var(--bg); }
+.pill.done { color: var(--ok); background: var(--accent-soft); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+label, .label { font-weight: 600; font-size: 14.5px; }
+.hint { font-size: 12.5px; color: var(--muted); font-weight: 400; }
+select, textarea, input[type=text] { width: 100%; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+textarea { min-height: 76px; resize: vertical; }
+select:focus, textarea:focus, input:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sites { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.site { font: inherit; font-size: 14px; text-align: left; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; }
+.site small { display: block; color: var(--muted); font-size: 12px; }
+.site[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.from-plan { font-size: 12px; color: var(--accent); }
+.result { border-top: 1px dashed var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.result:first-of-type { border-top: 0; padding-top: 0; }
+.result .name { font-weight: 500; }
+.two { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.decide { background: var(--amber-soft); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.decide .label { color: var(--amber); }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
+.add { align-self: flex-start; font: inherit; font-size: 13.5px; background: none; border: 0; color: var(--amber); padding: 4px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.warn { font-size: 12.5px; color: var(--muted); }
+.submit { font: inherit; font-weight: 600; font-size: 16px; padding: 14px; border-radius: 12px; border: 0; background: var(--accent); color: var(--surface); cursor: pointer; }
+.submit:disabled { opacity: .45; cursor: not-allowed; }
+.done-box { text-align: center; padding: 22px 16px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.done-box h3 { font-family: var(--font-display); font-size: 21px; }
+.ghost { font: inherit; font-size: 14px; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; }
+.empty { font-size: 13px; color: var(--muted); }
+.checks { display: flex; flex-direction: column; gap: 6px; }
+.check { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.check.sub { margin-left: 26px; }
+.check input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(--accent); margin: 0; }
+.check input[type=text] { border: 0; background: transparent; padding: 4px 0; min-width: 0; flex: 1; }
+.check input[type=text]:focus { outline: 0; }
+.check:focus-within { border-color: var(--accent); }
+.check.on input[type=text] { color: var(--muted); text-decoration: line-through; }
+.check .x { flex: none; font: inherit; font-size: 13px; border: 0; background: none; color: var(--muted); cursor: pointer; padding: 2px 4px; }
+.add-todo { color: var(--accent); }
+.datebar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; margin-top: 6px; }
+.datebar input[type=date] { width: 100%; min-width: 0; font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; font-variant-numeric: tabular-nums; }
+.ghost.sm { padding: 9px 12px; font-size: 13.5px; white-space: nowrap; }
+
+/* 종합 화면 */
+.sum-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.count { font-family: var(--font-display); font-size: 22px; font-variant-numeric: tabular-nums; }
+.missing { font-size: 13px; color: var(--amber); }
+.ag-list { display: flex; flex-direction: column; gap: 10px; }
+.ag { background: var(--amber-soft); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.ag .meta { font-size: 12px; color: var(--amber); }
+.ag .item { font-weight: 600; }
+.ag .prop { font-size: 14px; }
+.ag input { background: var(--surface); }
+.sitecard { gap: 12px; }
+.sitecard header { flex-direction: row; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sitecard h3 { font-size: 16px; }
+.sec { display: flex; flex-direction: column; gap: 4px; }
+.sec .k { font-size: 12px; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+.sec p { margin: 0; white-space: pre-wrap; }
+.sec ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.sec li { display: flex; gap: 8px; }
+.sec li.sub { padding-left: 24px; }
+.sec li .box { flex: none; width: 16px; color: var(--accent); }
+.sec li.done span:last-child { color: var(--muted); text-decoration: line-through; }
+.res + .res { margin-top: 4px; }
+.res .n { font-weight: 500; }
+.not-yet { color: var(--muted); font-size: 13.5px; }
+.prayers { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.actions .ghost { width: 100%; }
+.toast { font-size: 13px; color: var(--ok); min-height: 1.2em; text-align: center; }
+@media (min-width: 480px) { .two { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <section id="login" class="card login">
+    <span class="eyebrow">HEM 주간 회의 · 서면</span>
+    <h1>HEM 서면 보고</h1>
+    <p class="hint" style="margin:0">HEM 공유 폴더 권한이 있는 구글 계정으로 로그인해 주세요.</p>
+    <div id="gbtn"></div>
+    <p class="warn" id="login-msg" role="alert" style="margin:0;color:var(--amber)"></p>
+  </section>
+  <div id="app" class="view" hidden>
+
+  <header>
+    <span class="eyebrow">HEM 주간 회의 · 서면</span>
+    <h1 id="title">서면 보고</h1>
+    <div class="datebar">
+      <button type="button" class="ghost sm" id="prev">이전 주</button>
+      <input type="date" id="date" aria-label="회의 날짜">
+      <button type="button" class="ghost sm" id="next">다음 주</button>
+    </div>
+    <span class="week" id="week"></span>
+    <span class="hint">로그인: <b id="me"></b> · <button type="button" class="linkbtn" id="logout">로그아웃</button></span>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab" role="tab" id="tab-write" aria-controls="write" aria-selected="true">작성</button>
+    <button type="button" class="tab" role="tab" id="tab-summary" aria-controls="summary" aria-selected="false">종합</button>
+  </div>
+
+  <!-- 작성 -->
+  <section class="view" id="write" role="tabpanel" aria-labelledby="tab-write">
+    <section class="field" aria-labelledby="st-h">
+      <h2 id="st-h">제출 현황</h2>
+      <div class="status" id="status"></div>
+    </section>
+
+    <form class="card" id="form" novalidate>
+      <div class="field">
+        <span class="label" id="who-l">작성자</span>
+        <input type="hidden" id="who" value="">
+        <div class="sites" role="group" aria-labelledby="who-l" id="who-btns"></div>
+      </div>
+
+      <div class="field">
+        <span class="label" id="site-l">사역지</span>
+        <div class="sites" role="group" aria-labelledby="site-l" id="sites"></div>
+      </div>
+
+      <div id="detail" hidden>
+        <div class="card" style="padding:0;border:0;gap:16px">
+          <div class="field">
+            <label for="feedback">주일사역 피드백</label>
+            <textarea id="feedback" placeholder="출석, 분위기, 있었던 일"></textarea>
+          </div>
+
+          <div class="field">
+            <span class="label">이번 주 할 일 <span class="from-plan" id="todo-src"></span></span>
+            <div class="checks" id="todo"></div>
+            <button type="button" class="add add-todo" id="add-todo">할 일 추가</button>
+            <span class="hint" id="todo-hint"></span>
+          </div>
+
+          <div class="field">
+            <span class="label">결과보고 <span class="from-plan" id="res-src"></span></span>
+            <div id="results"></div>
+          </div>
+
+          <div class="decide">
+            <span class="label">같이 정할 것 <span class="hint">통화에서 이것만 다룹니다</span></span>
+            <div id="agenda" style="display:flex;flex-direction:column;gap:6px"></div>
+            <button type="button" class="add" id="add">안건 추가</button>
+          </div>
+
+          <div class="field">
+            <label for="pray">특이사항·기도제목</label>
+            <textarea id="pray"></textarea>
+            <span class="warn">비밀번호·사례 금액은 적지 않습니다.</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit" id="submit" type="submit" disabled>제출</button>
+      <p class="warn" id="form-err" role="alert" style="margin:0;color:var(--amber)"></p>
+      <button type="button" class="ghost" id="del-report" hidden>이 보고 삭제</button>
+    </form>
+
+    <div class="card done-box" id="done" hidden>
+      <h3 id="done-t">제출했습니다</h3>
+      <p class="hint" id="done-d"></p>
+      <div class="actions">
+        <button class="ghost" id="again" type="button">다른 사역지 쓰기</button>
+        <button class="ghost" id="see" type="button">종합 보기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 종합 -->
+  <section class="view" id="summary" role="tabpanel" aria-labelledby="tab-summary" hidden>
+    <div class="card">
+      <div class="datebar">
+        <button type="button" class="ghost sm" id="sprev">이전 주</button>
+        <span class="sweek" id="sweek"></span>
+        <button type="button" class="ghost sm" id="snext">다음 주</button>
+      </div>
+      <div class="sum-top">
+        <span class="count" id="count"></span>
+        <span class="missing" id="missing"></span>
+      </div>
+      <div class="status" id="status2"></div>
+    </div>
+
+    <div id="sum-empty" class="card" hidden>
+      <p class="empty" style="margin:0">이 날짜에 제출된 보고가 아직 없습니다. 작성 탭에서 사역지별로 제출하면 여기에 모입니다.</p>
+    </div>
+
+    <div id="sum-body" class="view">
+      <section class="field" aria-labelledby="ag-h">
+        <h2 id="ag-h">같이 정할 것 · 통화 안건</h2>
+        <div class="ag-list" id="ag-list"></div>
+      </section>
+
+      <section class="field" aria-labelledby="call-h">
+        <h2 id="call-h">통화 기록 · 통화 후 작성 <span class="hint" id="call-state"></span></h2>
+        <div class="card" style="gap:14px">
+          <div class="field">
+            <span class="label" id="att-l">참석</span>
+            <div class="sites" role="group" aria-labelledby="att-l" id="attend"></div>
+          </div>
+          <div class="field">
+            <label for="call-memo">나눈 이야기·결정</label>
+            <textarea id="call-memo" placeholder="안건 외에 정한 것, 공유된 내용"></textarea>
+          </div>
+          <div class="field">
+            <label for="call-owner">담당·기한</label>
+            <textarea id="call-owner" placeholder="예: 숯 구매 — 이예빈, 11/21까지"></textarea>
+          </div>
+          <div class="field">
+            <label for="call-pray">함께 기도한 제목</label>
+            <textarea id="call-pray"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="field" aria-labelledby="sc-h">
+        <h2 id="sc-h">사역지별</h2>
+        <div class="view" id="sitecards" style="gap:10px"></div>
+      </section>
+
+
+      <div class="actions">
+        <button type="button" class="ghost" id="copy">회의록 형식으로 복사</button>
+        <button type="button" class="ghost" id="to-doc">회의록 문서에 붙이기</button>
+      </div>
+      <div class="toast" id="toast" role="status"></div>
+      <button type="button" class="ghost" id="again-paste" hidden>한 번 더 붙이기</button>
+      <p class="hint" id="pasted" style="margin:0;text-align:center"></p>
+    </div>
+  </section>
+</div>
+</div>
+
+<script>
+const SITES = ["건강한교회", "한들교회", "흥왕교회 · 키즈", "흥왕교회 · 청앤청"];
+const PEOPLE = ["백요한", "이예광", "이예빈", "김충만"];
+let W = null, site = "", meet, todoN = 0, saveTimer = null, savePending = null;
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const md = d => `${d.getMonth() + 1}/${d.getDate()}`;
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const DOW = ["일", "월", "화", "수", "목", "금", "토"];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const API = "https://script.google.com/macros/s/AKfycbyZ73ttlKPYws-LRjHRrmWRysfqg2HAdRU309VAzL8CGPaQHn5wvciEfrMw8Wgb5qX23w/exec";
+const CLIENT_ID = "15273227392-pfh4egtr980a5tqgunfa3u1sq3n5q8fe.apps.googleusercontent.com";
+let idToken = "", me = null, started = false;
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+async function run(fn, ...args) {
+  if (!idToken || (me && me.exp * 1000 < Date.now() + 30000)) { showLogin("로그인이 만료됐습니다. 다시 로그인해 주세요."); throw new Error("로그인이 필요합니다."); }
+  const res = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ idToken, action: fn, args }) });
+  const j = await res.json();
+  if (!j.ok) {
+    if (j.code === "auth" || j.code === "denied") showLogin(j.error);
+    throw new Error(j.error || "알 수 없는 오류");
+  }
+  return j.data;
+}
+function decodeJwt(t) {
+  const b = t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  return JSON.parse(decodeURIComponent(atob(b).split("").map(c => "%" + c.charCodeAt(0).toString(16).padStart(2, "0")).join("")));
+}
+function showLogin(msg) {
+  $("login").hidden = false; $("app").hidden = true;
+  $("login-msg").textContent = msg || "";
+  if (window.google && google.accounts) google.accounts.id.prompt();
+}
+function onCredential(resp) {
+  idToken = resp.credential; me = decodeJwt(idToken);
+  $("login").hidden = true; $("app").hidden = false;
+  $("me").textContent = me.email;
+  const saved = store.get("hem-who:" + me.email);
+  if (saved && !$("who").value) { $("who").value = saved; renderWho(); }
+  if (!started) { started = true; const t = new Date(); setDate(new Date(t.getFullYear(), t.getMonth(), t.getDate())); }
+  else setDate(meet);
+}
+window.initLogin = function () {
+  google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onCredential, auto_select: true, use_fedcm_for_prompt: true });
+  google.accounts.id.renderButton($("gbtn"), { theme: "outline", size: "large", text: "signin_with", locale: "ko", shape: "pill" });
+  google.accounts.id.prompt();
+};
+const errText = e => "저장하지 못했습니다. 인터넷 연결을 확인하고 다시 눌러 주세요. (" + (e && e.message ? e.message : e) + ")";
+
+function useWeek(w) {
+  W = w;
+  W.call = W.call || {};
+  W.call.attend = W.call.attend || [];
+  W.call.decisions = W.call.decisions || {};
+  W.call.siteNotes = W.call.siteNotes || {};
+  ["memo", "owner", "pray"].forEach(k => W.call[k] = W.call[k] || "");
+  $("week").textContent = `결과보고: ${w.resultDay} 주일 · 이번 주 할 일: ${w.todoDay} 주일까지`;
+  renderStatus(); renderSummary();
+  if (site) pick(site);
+}
+function setDate(d) {
+  d = addDays(d, -d.getDay()); // 그 주 주일로 고정
+  meet = d;
+  $("date").value = iso(d);
+  $("title").textContent = `${md(d)} 주일 보고`;
+  $("sweek").textContent = `${md(d)}(주일) ~ ${md(addDays(d, 6))}`;
+  $("week").textContent = "일정표와 제출 내용을 불러오는 중…";
+  W = null; renderStatus(); renderSummary();
+  const want = iso(d);
+  run("getWeek", want).then(w => { if (want === iso(meet)) useWeek(w); })
+    .catch(e => { $("week").textContent = "불러오지 못했습니다. 새로고침해 주세요. (" + (e.message || e) + ")"; });
+}
+function planFor(s) {
+  return {
+    todo: (W.todo[s] || []).map(t => `${W.todoDay} ${t}`),
+    results: (W.results[s] || []).map(t => `${W.resultDay} ${t}`)
+  };
+}
+
+/* ---------- 작성 ---------- */
+function statusHTML() {
+  return SITES.map(s => {
+    const r = W && W.reports[s];
+    const label = !W ? "…" : r ? esc(r.who) + " 제출" : "아직";
+    return `<div class="st${r ? " done" : ""}"><b>${s}</b><span class="who">${label}</span></div>`;
+  }).join("");
+}
+function renderStatus() { $("status").innerHTML = statusHTML(); }
+function renderSites() {
+  $("sites").innerHTML = SITES.map(s => {
+    const [a, b] = s.split(" · ");
+    return `<button type="button" class="site" data-s="${s}" aria-pressed="${s === site}">${b ? `<small>${a}</small>${b}` : a}</button>`;
+  }).join("");
+}
+function agendaRow(item = "", proposal = "") {
+  const d = document.createElement("div");
+  const n = $("agenda").children.length + 1;
+  d.className = "row";
+  d.innerHTML = `<input type="text" id="ag-${n}" aria-label="안건 ${n}" placeholder="안건"><input type="text" id="pr-${n}" aria-label="제안 ${n}" placeholder="제안">`;
+  const [a, b] = d.querySelectorAll("input"); a.value = item; b.value = proposal;
+  $("agenda").appendChild(d);
+}
+function todoRow(text, sub, done) {
+  const n = ++todoN;
+  const d = document.createElement("div");
+  d.className = "check" + (sub ? " sub" : "") + (done ? " on" : "");
+  d.innerHTML = `<input type="checkbox" id="td-c-${n}" aria-label="완료"><input type="text" id="td-t-${n}" aria-label="할 일" placeholder="할 일"><button type="button" class="x" aria-label="이 줄 지우기">지우기</button>`;
+  d.querySelector("input[type=text]").value = text;
+  const cb = d.querySelector("input[type=checkbox]"); cb.checked = !!done;
+  cb.addEventListener("change", e => d.classList.toggle("on", e.target.checked));
+  d.querySelector(".x").addEventListener("click", () => d.remove());
+  $("todo").appendChild(d);
+  return d;
+}
+function pick(s) {
+  site = s; renderSites();
+  if (!W) return;
+  const p = planFor(s);
+  const prev = W.reports[s];
+  $("detail").hidden = false;
+  $("todo").innerHTML = "";
+  if (prev) prev.todos.forEach(t => todoRow(t.text, t.sub, t.done));
+  else p.todo.forEach(t => todoRow(t, false, false));
+  if (!$("todo").children.length) todoRow("", false, false);
+  $("todo-hint").textContent = prev ? "제출한 내용을 불러왔습니다. 고쳐서 다시 제출하면 바뀝니다."
+    : p.todo.length ? "일정표에서 가져왔습니다. 끝난 일은 체크하고, 바뀐 내용은 글자를 눌러 고치세요."
+    : "일정표에 적힌 일이 없습니다. 있으면 적어 주세요.";
+  $("todo-src").textContent = !prev && p.todo.length ? "· 일정표" : "";
+  $("res-src").textContent = !prev && p.results.length ? "· 일정표" : "";
+  const res = prev ? prev.results : p.results.map(n => ({ name: n, good: "", fix: "" }));
+  $("results").innerHTML = res.length && res.some(r => r.name) ? res.map((r, i) => `
+    <div class="result" data-name="${esc(r.name)}">
+      <span class="name">${esc(r.name)}</span>
+      <div class="two">
+        <textarea id="good-${i}" class="good" aria-label="${esc(r.name)} 좋았던 점" placeholder="좋았던 점">${esc(r.good)}</textarea>
+        <textarea id="fix-${i}" class="fix" aria-label="${esc(r.name)} 개선할 점" placeholder="개선할 점">${esc(r.fix)}</textarea>
+      </div>
+    </div>`).join("") : `<span class="empty">지난주 일정표에 적힌 사역이 없습니다. 있었다면 아래에 적어 주세요.</span><div class="result" data-name=""><textarea id="good-x" class="good" aria-label="결과보고" placeholder="사역명 · 좋았던 점 · 개선할 점">${esc(res[0] ? res[0].good : "")}</textarea></div>`;
+  $("agenda").innerHTML = "";
+  (prev && prev.agenda.length ? prev.agenda : [{ item: "", proposal: "" }]).forEach(a => agendaRow(a.item, a.proposal));
+  $("feedback").value = prev ? prev.feedback : "";
+  $("pray").value = prev ? prev.pray : "";
+  if (prev && !$("who").value) { $("who").value = prev.who; renderWho(); }
+  $("submit").textContent = prev ? "고쳐서 다시 제출" : "제출";
+  disarm($("del-report")); $("del-report").hidden = !prev;
+  check();
+}
+function renderWho() {
+  $("who-btns").innerHTML = PEOPLE.map(p => `<button type="button" class="site" data-w="${p}" aria-pressed="${$("who").value === p}">${p}</button>`).join("");
+}
+function disarm(b) { if (!b) return; clearTimeout(b._t); b.classList.remove("armed"); b.textContent = b.dataset.label || b.textContent; }
+// 삭제는 두 번 눌러야 실행
+function confirmTwice(b, go, armedText) {
+  if (!b.classList.contains("armed")) {
+    b.dataset.label = b.textContent; b.classList.add("armed"); b.textContent = armedText || "한 번 더 누르면 삭제";
+    b._t = setTimeout(() => disarm(b), 4000); return;
+  }
+  disarm(b); go();
+}
+function removeReport(s, b) {
+  b.disabled = true; b.textContent = "삭제 중…";
+  return run("deleteReport", iso(meet), s).then(w => { b.disabled = false; useWeek(w); $("toast").textContent = `${s} 보고를 삭제했습니다.`; })
+    .catch(e => { b.disabled = false; b.textContent = "삭제"; $("toast").textContent = errText(e); });
+}
+function check() { $("submit").disabled = !($("who").value && site && W); }
+function collect() {
+  return {
+    who: $("who").value,
+    feedback: $("feedback").value.trim(),
+    todos: [...$("todo").children].map(d => ({
+      text: d.querySelector("input[type=text]").value.trim(),
+      done: d.querySelector("input[type=checkbox]").checked,
+      sub: d.classList.contains("sub")
+    })).filter(t => t.text),
+    results: [...$("results").querySelectorAll(".result")].map(r => ({
+      name: r.dataset.name,
+      good: (r.querySelector(".good") || {}).value?.trim() || "",
+      fix: (r.querySelector(".fix") || {}).value?.trim() || ""
+    })).filter(r => r.name || r.good),
+    agenda: [...$("agenda").children].map(r => {
+      const [a, b] = r.querySelectorAll("input");
+      return { item: a.value.trim(), proposal: b.value.trim() };
+    }).filter(a => a.item),
+    pray: $("pray").value.trim()
+  };
+}
+
+/* ---------- 종합 ---------- */
+function renderSummary() {
+  if (!W) { $("count").textContent = "불러오는 중…"; $("missing").textContent = ""; $("status2").innerHTML = statusHTML(); $("sum-body").hidden = true; $("sum-empty").hidden = true; return; }
+  const got = SITES.filter(s => W.reports[s]);
+  const miss = SITES.filter(s => !W.reports[s]);
+  $("count").textContent = `${SITES.length}곳 중 ${got.length}곳 제출`;
+  $("missing").textContent = miss.length ? `아직: ${miss.join(", ")}` : "모두 제출했습니다";
+  $("status2").innerHTML = statusHTML();
+  $("sum-empty").hidden = got.length > 0;
+  $("sum-body").hidden = got.length === 0;
+  if (!got.length) return;
+
+  const c = W.call;
+  $("attend").innerHTML = PEOPLE.map(p => `<button type="button" class="site" data-p="${p}" aria-pressed="${c.attend.includes(p)}">${p}</button>`).join("");
+  $("call-memo").value = c.memo; $("call-owner").value = c.owner; $("call-pray").value = c.pray;
+  $("pasted").textContent = c.pastedAt ? `회의록에 붙인 시각: ${new Date(c.pastedAt).toLocaleString("ko-KR")}` : "";
+
+  const ags = got.flatMap(s => W.reports[s].agenda.map((a, i) => ({ s, i, ...a })));
+  $("ag-list").innerHTML = ags.length ? ags.map(a => {
+    const dk = `${a.s}|${a.i}`;
+    return `<div class="ag">
+      <span class="meta">${a.s} · ${esc(W.reports[a.s].who)}</span>
+      <span class="item">${esc(a.item)}</span>
+      ${a.proposal ? `<span class="prop">제안: ${esc(a.proposal)}</span>` : ""}
+      <input type="text" id="dec-${a.i}-${SITES.indexOf(a.s)}" data-k="${esc(dk)}" aria-label="${esc(a.item)} 결정" placeholder="결정 (통화 후 작성)" value="${esc(c.decisions[dk] || "")}">
+    </div>`;
+  }).join("") : `<p class="empty" style="margin:0">올라온 안건이 없습니다. 통화는 기도로만 마쳐도 됩니다.</p>`;
+
+  $("sitecards").innerHTML = SITES.map(s => {
+    const r = W.reports[s];
+    const note = `<div class="field"><label class="k" for="note-${SITES.indexOf(s)}">통화 요약</label><textarea class="note" id="note-${SITES.indexOf(s)}" data-site="${s}" placeholder="통화에서 이 사역지에 대해 나눈 이야기">${esc(W.call.siteNotes[s] || "")}</textarea></div>`;
+    if (!r) return `<div class="card sitecard"><header><h3>${s}</h3><span class="pill">아직</span></header><span class="not-yet">제출 전입니다.</span>${note}</div>`;
+    const todos = r.todos.length ? `<ul>${r.todos.map(t => `<li class="${t.sub ? "sub " : ""}${t.done ? "done" : ""}"><span class="box">${t.done ? "☑" : "☐"}</span><span>${esc(t.text)}</span></li>`).join("")}</ul>` : `<p class="not-yet">없음</p>`;
+    const res = r.results.length ? r.results.map(x => `<div class="res">${x.name ? `<span class="n">${esc(x.name)}</span>` : ""}${x.good ? `<p>${x.name ? "좋았던 점: " : ""}${esc(x.good)}</p>` : ""}${x.fix ? `<p>개선할 점: ${esc(x.fix)}</p>` : ""}${!x.good && !x.fix ? `<p class="not-yet">내용 없음</p>` : ""}</div>`).join("") : `<p class="not-yet">없음</p>`;
+    return `<div class="card sitecard">
+      <header><h3>${s}</h3><span class="pill done">${esc(r.who)}</span>
+        <span class="card-actions" style="margin-left:auto"><button type="button" class="ghost" data-edit="${s}">고치기</button><button type="button" class="ghost danger" data-del="${s}">삭제</button></span></header>
+      <div class="sec"><span class="k">주일사역 피드백</span>${r.feedback ? `<p>${esc(r.feedback)}</p>` : `<p class="not-yet">없음</p>`}</div>
+      <div class="sec"><span class="k">이번 주 할 일</span>${todos}</div>
+      <div class="sec"><span class="k">결과보고</span>${res}</div>
+      <div class="sec"><span class="k">특이사항·기도제목</span>${r.pray ? `<p>${esc(r.pray)}</p>` : `<p class="not-yet">없음</p>`}</div>
+      ${note}
+    </div>`;
+  }).join("");
+
+}
+function queueSave() {
+  $("call-state").textContent = "저장 중…";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSave, 800);
+}
+function flushSave() {
+  clearTimeout(saveTimer); saveTimer = null;
+  if (!W) return Promise.resolve();
+  const want = iso(meet);
+  savePending = run("saveCall", want, W.call)
+    .then(() => { $("call-state").textContent = "저장됨"; })
+    .catch(e => { $("call-state").textContent = errText(e); });
+  return savePending;
+}
+function asText() {
+  const L = [`┃${iso(addDays(meet, 1)).replace(/-/g, ".")} HEM 서면 회의록┃`, `보고 주: ${md(meet)}(주일) ~ ${md(addDays(meet, 6))}`, ""];
+  SITES.forEach(s => {
+    const r = W.reports[s];
+    L.push(`■ ${s}${r ? ` (${r.who})` : " — 미제출"}`);
+    if (!r) { if (W.call.siteNotes[s]) L.push(`- 통화 요약: ${W.call.siteNotes[s]}`); L.push(""); return; }
+    L.push(`- 주일사역 피드백: ${r.feedback || "없음"}`);
+    L.push("- 이번 주 할 일:");
+    r.todos.forEach(t => L.push(`${t.sub ? "    " : "  "}${t.done ? "☑" : "☐"} ${t.text}`));
+    L.push("- 결과보고:");
+    r.results.forEach(x => L.push(`  ${x.name} ${x.good ? "/ 좋았던 점: " + x.good : ""} ${x.fix ? "/ 개선할 점: " + x.fix : ""}`.trimEnd()));
+    if (W.call.siteNotes[s]) L.push(`- 통화 요약: ${W.call.siteNotes[s]}`);
+    L.push("");
+  });
+  L.push("■ 같이 정할 것");
+  SITES.forEach(s => (W.reports[s]?.agenda || []).forEach((a, i) =>
+    L.push(`- [${s}] ${a.item}${a.proposal ? " / 제안: " + a.proposal : ""} / 결정: ${W.call.decisions[`${s}|${i}`] || ""}`)));
+  L.push("", "■ 특이사항·기도제목");
+  SITES.forEach(s => { const p = W.reports[s]?.pray; if (p) L.push(`- [${s}] ${p}`); });
+  const c = W.call;
+  L.push("", "■ 통화 결과", `- 참석: ${c.attend.join(", ")}`, `- 나눈 이야기·결정: ${c.memo}`, `- 담당·기한: ${c.owner}`, `- 기도제목: ${c.pray}`);
+  return L.join("\n");
+}
+async function paste(force) {
+  $("to-doc").disabled = true; $("again-paste").hidden = true;
+  $("toast").textContent = "회의록에 붙이는 중…";
+  try {
+    if (saveTimer) await flushSave(); else if (savePending) await savePending;
+    const r = await run("pasteToDoc", iso(meet), !!force);
+    if (r.already) {
+      $("toast").textContent = `이미 ${new Date(r.already).toLocaleString("ko-KR")}에 붙였습니다. 한 번 더 붙이면 회의록에 같은 표가 하나 더 생깁니다.`;
+      $("again-paste").hidden = false;
+    } else {
+      W.call.pastedAt = new Date().toISOString();
+      $("pasted").textContent = `회의록에 붙인 시각: ${new Date().toLocaleString("ko-KR")}`;
+      $("toast").innerHTML = `[실무] 26년도 실무회의 탭 맨 위에 붙였습니다. <a href="${r.url}" target="_blank" rel="noopener">회의록 열기</a>`;
+    }
+  } catch (e) { $("toast").textContent = errText(e); }
+  $("to-doc").disabled = false;
+}
+
+/* ---------- 탭 ---------- */
+function show(view) {
+  const w = view !== "summary";
+  $("write").hidden = !w; $("summary").hidden = w;
+  $("tab-write").setAttribute("aria-selected", w);
+  $("tab-summary").setAttribute("aria-selected", !w);
+  if (!w) renderSummary();
+}
+
+/* ---------- 이벤트 ---------- */
+$("sites").addEventListener("click", e => { const b = e.target.closest(".site"); if (b) pick(b.dataset.s); });
+$("who-btns").addEventListener("click", e => { const b = e.target.closest("[data-w]"); if (!b) return; $("who").value = b.dataset.w; if (me) store.set("hem-who:" + me.email, b.dataset.w); renderWho(); check(); });
+$("add").addEventListener("click", () => agendaRow());
+$("add-todo").addEventListener("click", () => todoRow("", false, false).querySelector("input[type=text]").focus());
+$("form").addEventListener("submit", e => {
+  e.preventDefault();
+  if ($("submit").disabled) return;
+  const btn = $("submit"), label = btn.textContent, s = site;
+  btn.disabled = true; btn.textContent = "저장 중…"; $("form-err").textContent = "";
+  run("submitReport", iso(meet), s, collect()).then(w => {
+    btn.textContent = label;
+    site = ""; useWeek(w);
+    $("form").hidden = true; $("done").hidden = false;
+    $("done-t").textContent = `${md(meet)} ${s} 제출했습니다`;
+    $("done-d").textContent = "고칠 게 있으면 같은 사역지를 다시 골라 제출하면 바뀝니다.";
+  }).catch(err => { btn.textContent = label; btn.disabled = false; $("form-err").textContent = errText(err); });
+});
+$("again").addEventListener("click", () => {
+  site = ""; $("form").reset(); $("who").value = ""; renderWho(); $("detail").hidden = true; $("submit").textContent = "제출"; $("del-report").hidden = true; $("form-err").textContent = "";
+  $("form").hidden = false; $("done").hidden = true; renderSites(); check();
+});
+$("see").addEventListener("click", () => { $("again").click(); show("summary"); });
+$("tab-write").addEventListener("click", () => show("write"));
+$("tab-summary").addEventListener("click", () => show("summary"));
+$("ag-list").addEventListener("input", e => { if (e.target.dataset.k && W) { W.call.decisions[e.target.dataset.k] = e.target.value; queueSave(); } });
+$("attend").addEventListener("click", e => {
+  const b = e.target.closest("[data-p]"); if (!b || !W) return;
+  const c = W.call, p = b.dataset.p;
+  c.attend = c.attend.includes(p) ? c.attend.filter(x => x !== p) : [...c.attend, p];
+  b.setAttribute("aria-pressed", c.attend.includes(p));
+  queueSave();
+});
+[["call-memo", "memo"], ["call-owner", "owner"], ["call-pray", "pray"]].forEach(([id, f]) =>
+  $(id).addEventListener("input", e => { if (W) { W.call[f] = e.target.value; queueSave(); } }));
+$("copy").addEventListener("click", async () => {
+  const text = asText();
+  try { await navigator.clipboard.writeText(text); $("toast").textContent = "복사했습니다."; }
+  catch { $("toast").textContent = "복사가 막혀 있습니다. 회의록에 붙이기 버튼을 써 주세요."; }
+});
+$("to-doc").addEventListener("click", () => paste(false));
+$("again-paste").addEventListener("click", () => paste(true));
+$("date").addEventListener("change", e => {
+  if (!e.target.value) return;
+  const [y, m, d] = e.target.value.split("-").map(Number);
+  site = ""; $("detail").hidden = true; renderSites();
+  setDate(new Date(y, m - 1, d));
+});
+const step = n => { site = ""; $("detail").hidden = true; renderSites(); setDate(addDays(meet, n)); };
+$("prev").addEventListener("click", () => step(-7));
+$("next").addEventListener("click", () => step(7));
+$("sprev").addEventListener("click", () => step(-7));
+$("snext").addEventListener("click", () => step(7));
+$("sitecards").addEventListener("click", e => {
+  const ed = e.target.closest("[data-edit]"), del = e.target.closest("[data-del]");
+  if (ed && W) {
+    const s = ed.dataset.edit;
+    $("form").hidden = false; $("done").hidden = true;
+    $("who").value = W.reports[s].who; renderWho();
+    show("write"); pick(s); window.scrollTo(0, 0);
+  }
+  if (del && W) confirmTwice(del, () => removeReport(del.dataset.del, del), "확인");
+});
+$("del-report").addEventListener("click", e => {
+  const b = e.currentTarget, s = site;
+  if (!s) return;
+  confirmTwice(b, () => {
+    b.disabled = true; b.textContent = "삭제 중…";
+    run("deleteReport", iso(meet), s).then(w => {
+      b.disabled = false; b.hidden = true; b.textContent = "이 보고 삭제";
+      site = ""; $("form").reset(); $("detail").hidden = true; $("submit").textContent = "제출";
+      useWeek(w); renderSites(); check();
+      $("form-err").textContent = `${s} 보고를 삭제했습니다.`;
+    }).catch(err => { b.disabled = false; b.textContent = "이 보고 삭제"; $("form-err").textContent = errText(err); });
+  });
+});
+$("sitecards").addEventListener("input", e => { const s = e.target.dataset.site; if (s && W) { W.call.siteNotes[s] = e.target.value; queueSave(); } });
+
+renderSites(); renderWho();
+$("logout").addEventListener("click", () => { if (window.google) google.accounts.id.disableAutoSelect(); idToken = ""; me = null; showLogin("로그아웃했습니다."); });
+if (window.google && google.accounts) window.initLogin();
+show("write");
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="window.initLogin()"></script>
+</body>
+</html>
